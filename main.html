@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>nazozokc :: kanagawa-dragon</title>
+<link rel="stylesheet" href="main.css">
+</head>
+<body>
+<!-- Top bar -->
+<div class="top-bar">
+  <div class="top-bar-inner">
+    <div class="top-bar-title">
+      <span class="status-dot"></span>
+      nazozokc@arch — terminal
+    </div>
+    <div class="top-bar-links">
+      <a href="https://x.com/@NazozoK6519" target="_blank" class="link-x">X</a>
+      <a href="https://github.com/nazozokc" target="_blank" class="link-gh">GitHub</a>
+    </div>
+  </div>
+</div>
+
+<!-- Terminal container -->
+<div class="terminal-container">
+  <div id="terminal" class="terminal-output"></div>
+
+  <!-- Command input -->
+  <div class="input-line">
+    <span class="prompt-user">nazozokc@arch</span>:<span class="prompt-path">~</span>$
+    <input id="cmdInput" type="text" autocomplete="off" autofocus>
+    <span class="cursor-blink">▌</span>
+  </div>
+
+  <!-- Click commands -->
+  <div class="click-commands">
+    <div class="click-header">[click to execute]</div>
+    <div class="click-grid">
+      <div class="click-item" data-cmd="neovim">
+        <span class="click-num">[1]</span>
+        <span class="click-cmd">neovim</span>
+      </div>
+      <div class="click-item" data-cmd="blog">
+        <span class="click-num">[2]</span>
+        <span class="click-cmd">blog</span>
+      </div>
+      <div class="click-item" data-cmd="X">
+        <span class="click-num">[3]</span>
+        <span class="click-cmd">X</span>
+      </div>
+      <div class="click-item" data-cmd="github">
+        <span class="click-num">[4]</span>
+        <span class="click-cmd">github</span>
+      </div>
+      <div class="click-item" data-cmd=":q">
+        <span class="click-num">[5]</span>
+        <span class="click-cmd">:q</span>
+        <span class="click-desc">(return to top)</span>
+      </div>
+      <div class="click-item" data-cmd="clear">
+        <span class="click-num">[6]</span>
+        <span class="click-cmd">clear</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="main.js"></script>
+</body>
+</html>
