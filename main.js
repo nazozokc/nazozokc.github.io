@@ -110,7 +110,7 @@ async function executeCommand(cmd) {
       createOutputLine('<a href="https://x.com/@NazozoK6519" target="_blank" class="repo-url">https://x.com/@NazozoK6519</a>');
       break;
     case "github":
-      createOutputLine('<a href="https://github.com/nazozokc" target="_blank" class="repo-url">https://github.com/nazozokc</a>');
+      await handleGithub();
       break;
     case ":q":
       await handleQuit();
@@ -245,6 +245,69 @@ async function loadBlogPost(file) {
   } catch (err) {
     loading.remove();
     createOutputLine('<span class="error-msg">error: failed to load post</span>');
+  }
+}
+
+async function handleGithub() {
+  const loading = createOutputLine('<span class="loading">loading github info</span>');
+
+  try {
+    const userRes = await fetch("https://api.github.com/users/nazozokc");
+    const user = await userRes.json();
+    loading.remove();
+    
+    createOutputLine("<span class='accent'>GitHub Profile:</span>");
+    createOutputLine("");
+    createOutputLine(`<span class='repo-name'>${escapeHtml(user.name || "nazozokc")}</span>`);
+    createOutputLine(`<span class="muted">${escapeHtml(user.bio || "")}</span>`);
+    createOutputLine(`<a href="${user.html_url}" target="_blank" class="repo-url">${user.html_url}</a>`);
+    createOutputLine("");
+    createOutputLine(`<span class="muted">repos: ${user.public_repos}</span> | <span class="muted">followers: ${user.followers}</span> | <span class="muted">following: ${user.following}</span>`);
+    createOutputLine("");
+
+    const loading2 = createOutputLine('<span class="loading">loading commit stats</span>');
+
+    const reposRes = await fetch("https://api.github.com/users/nazozokc/repos?per_page=100");
+    const repos = await reposRes.json();
+    const ownRepos = repos.filter(r => !r.fork);
+
+    const repoCommits = [];
+    let totalCommits = 0;
+
+    for (const repo of ownRepos) {
+      try {
+        const commitsRes = await fetch(`https://api.github.com/repos/nazozokc/${repo.name}/commits?per_page=1`);
+        const linkHeader = commitsRes.headers.get('link') || '';
+        const lastPageMatch = linkHeader.match(/page=(\d+)>; rel="last"/);
+        const commitCount = lastPageMatch ? parseInt(lastPageMatch[1]) : 1;
+        
+        repoCommits.push({ name: repo.name, commits: commitCount, url: repo.html_url });
+        totalCommits += commitCount;
+      } catch {
+        repoCommits.push({ name: repo.name, commits: 0, url: repo.html_url });
+      }
+    }
+
+    loading2.remove();
+
+    createOutputLine(`<span class='accent'>total commits:</span> ${totalCommits}`);
+    createOutputLine("");
+    createOutputLine("<span class='accent'>top 3 repositories by commits:</span>");
+    createOutputLine("");
+
+    const top3 = repoCommits.sort((a, b) => b.commits - a.commits).slice(0, 3);
+    
+    for (const repo of top3) {
+      createOutputLine(`<span class='repo-name'>${escapeHtml(repo.name)}</span> - ${repo.commits} commits`);
+      createOutputLine(`<a href="${repo.url}" target="_blank" class="repo-url">${repo.url}</a>`);
+      createOutputLine("");
+    }
+
+    createOutputLine('<a href="https://github.com/nazozokc" target="_blank" class="repo-url">view all repos →</a>');
+
+  } catch (err) {
+    loading.remove();
+    createOutputLine('<span class="error-msg">error: failed to load github info</span>');
   }
 }
 
