@@ -43,7 +43,7 @@ function createOutputLine(content, className = '') {
 }
 
 // Typing animation
-async function typeText(text, element, speed = 15) {
+async function typeText(text, element, speed = 12) {
   let i = 0;
   return new Promise(resolve => {
     const interval = setInterval(() => {
@@ -59,12 +59,11 @@ async function typeText(text, element, speed = 15) {
   });
 }
 
-// Append multiple lines with delay
-async function appendLines(lines, delay = 20) {
+async function appendLines(lines, delay = 15) {
   for (const line of lines) {
     const el = createOutputLine('');
     await typeText(line, el, delay);
-    await sleep(50);
+    await sleep(30);
   }
 }
 
@@ -121,15 +120,16 @@ async function executeCommand(cmd) {
 // Neovim command
 async function handleNeovim() {
   await appendLines([
-    "╔════════════════════════════════════╗",
-    "║       Neovim Environment           ║",
-    "╠════════════════════════════════════╣",
-    "║  editor  │  Neovim                 ║",
-    "║  theme   │  kanagawa-dragon        ║",
-    "║  policy  │  軽さ / 自作 / 可読性    ║",
-    "╚════════════════════════════════════╝",
+    "",
+    "  ╭────────────────────────────────────╮",
+    "  │      Neovim Environment            │",
+    "  ├────────────────────────────────────┤",
+    "  │  editor  │  Neovim                 │",
+    "  │  theme   │  kanagawa-dragon        │",
+    "  │  policy  │  軽さ / 自作 / 可読性    │",
+    "  ╰────────────────────────────────────╯",
     ""
-  ], 15);
+  ], 12);
 }
 
 // Blog command
@@ -240,34 +240,31 @@ function escapeHtml(text) {
 async function initTerminal() {
   terminal.innerHTML = "";
 
-  // whoami
   createOutputLine(
     `<span class="prompt-user">nazozokc@arch</span>:<span class="prompt-path">~</span>$ <span class="cmd-highlight">whoami</span>`
   );
-  await sleep(200);
+  await sleep(150);
   createOutputLine("nazozokc");
-  await sleep(300);
+  await sleep(250);
 
-  // about
   createOutputLine(
     `<span class="prompt-user">nazozokc@arch</span>:<span class="prompt-path">~</span>$ <span class="cmd-highlight">cat about.txt</span>`
   );
-  await sleep(200);
+  await sleep(150);
   await appendLines([
     "中学生プログラマ",
     "Arch Linux / Neovim / TypeScript",
     "API開発・CLIツール・環境構築が好き"
-  ], 20);
-  await sleep(300);
+  ], 18);
+  await sleep(250);
 
-  // skills
   createOutputLine(
     `<span class="prompt-user">nazozokc@arch</span>:<span class="prompt-path">~</span>$ <span class="cmd-highlight">ls skills/</span>`
   );
-  await sleep(200);
-  createOutputLine("<span class='accent'>TypeScript</span>  <span class='muted'>JavaScript</span>  <span class='muted'>Node.js</span>");
-  createOutputLine("<span class='muted'>React</span>       <span class='muted'>Linux</span>       <span class='muted'>Neovim</span>");
-  await sleep(300);
+  await sleep(150);
+  createOutputLine("<span class='skill-tag primary'>TypeScript</span><span class='skill-tag secondary'>JavaScript</span><span class='skill-tag secondary'>Node.js</span>");
+  createOutputLine("<span class='skill-tag secondary'>React</span><span class='skill-tag secondary'>Linux</span><span class='skill-tag secondary'>Neovim</span>");
+  await sleep(250);
 
   // projects
   createOutputLine(
