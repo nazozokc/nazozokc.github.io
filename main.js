@@ -75,7 +75,7 @@ function sleep(ms) {
 
 // Scroll to bottom
 function scrollToBottom() {
-  var scrollHeight = document.body.scrollHeight;
+  const scrollHeight = document.body.scrollHeight;
   if ('scrollBehavior' in document.documentElement.style) {
     window.scrollTo({
       top: scrollHeight,
@@ -134,17 +134,56 @@ async function handleNeovim() {
 
 // Blog command
 async function handleBlog() {
-  const loading = createOutputLine('<span class="loading">loading latest blog</span>');
+  const loading = createOutputLine('<span class="loading">loading blog list</span>');
 
   try {
-    const response = await fetch("./blog/index.md");
+    const response = await fetch("./blog/index.json");
+    if (!response.ok) throw new Error("Not found");
+    const posts = await response.json();
+    loading.remove();
+
+    createOutputLine("<span class='accent'>blog posts:</span>");
+    createOutputLine("");
+
+    for (const post of posts) {
+      const postDiv = document.createElement('div');
+      postDiv.className = 'blog-item';
+      postDiv.dataset.file = post.file;
+      postDiv.innerHTML = `<span class="blog-emoji">${post.emoji}</span> <span class="blog-title">${escapeHtml(post.title)}</span>`;
+      terminal.appendChild(postDiv);
+      await sleep(50);
+      scrollToBottom();
+    }
+
+    createOutputLine("");
+    createOutputLine("<span class='muted'>click to read</span>");
+
+    document.querySelectorAll('.blog-item').forEach(item => {
+      item.addEventListener('click', () => {
+        loadBlogPost(item.dataset.file);
+      });
+    });
+
+  } catch (err) {
+    loading.remove();
+    createOutputLine('<span class="error-msg">error: failed to load blog list</span>');
+  }
+}
+
+async function loadBlogPost(file) {
+  const loading = createOutputLine('<span class="loading">loading post</span>');
+
+  try {
+    const response = await fetch(`./blog/${file}`);
     if (!response.ok) throw new Error("Not found");
     const md = await response.text();
     loading.remove();
-    displayMarkdown(md, true);
+    
+    let content = md.replace(/^---[\s\S]*?---\n?/, '');
+    displayMarkdown(content, true);
   } catch (err) {
     loading.remove();
-    createOutputLine('<span class="error-msg">error: failed to load blog</span>');
+    createOutputLine('<span class="error-msg">error: failed to load post</span>');
   }
 }
 
@@ -162,6 +201,10 @@ function handleClear() {
 
 // Display markdown
 function displayMarkdown(md, showBackTop = false) {
+  if (typeof marked === 'undefined') {
+    createOutputLine('<span class="error-msg">error: markdown parser not loaded</span>');
+    return;
+  }
   const div = document.createElement("div");
   div.className = "md";
   div.innerHTML = marked.parse(md);

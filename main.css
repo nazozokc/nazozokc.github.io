@@ -396,6 +396,31 @@ body {
   text-decoration: underline;
 }
 
+.blog-item {
+  padding: 0.5rem 0.75rem;
+  margin: 0.25rem 0;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.blog-item:hover {
+  background: rgba(139, 164, 176, 0.1);
+  transform: translateX(5px);
+}
+
+.blog-emoji {
+  margin-right: 0.5rem;
+}
+
+.blog-title {
+  color: var(--fg);
+}
+
+.blog-item:hover .blog-title {
+  color: var(--yellow);
+}
+
 /* Responsive */
 @media (max-width: 640px) {
   .terminal-container {
