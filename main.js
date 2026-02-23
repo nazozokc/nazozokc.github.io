@@ -97,6 +97,12 @@ async function executeCommand(cmd) {
     case "neovim":
       await handleNeovim();
       break;
+    case "nix":
+      await handleNix();
+      break;
+    case "wezterm":
+      await handleWezterm();
+      break;
     case "blog":
       await handleBlog();
       break;
@@ -121,15 +127,70 @@ async function executeCommand(cmd) {
 async function handleNeovim() {
   await appendLines([
     "",
-    "  ╭────────────────────────────────────╮",
-    "  │      Neovim Environment            │",
-    "  ├────────────────────────────────────┤",
-    "  │  editor  │  Neovim                 │",
-    "  │  theme   │  kanagawa-dragon        │",
-    "  │  policy  │  軽さ / 自作 / 可読性    │",
-    "  ╰────────────────────────────────────╯",
+    "  ╭──────────────────────────────────────────────╮",
+    "  │           Neovim Environment                 │",
+    "  ├──────────────────────────────────────────────┤",
+    "  │  manager   │  lazy.nvim                      │",
+    "  │  theme     │  kanagawa-dragon                │",
+    "  │  policy    │  軽さ / 自作 / 可読性            │",
+    "  ├──────────────────────────────────────────────┤",
+    "  │  LSP       │  lua_ls, ts_ls, html, nixd      │",
+    "  │  finder    │  snacks.nvim, telescope         │",
+    "  │  status    │  lualine, noice, nvim-notify    │",
+    "  │  git       │  gitsigns, lazygit, octo        │",
+    "  │  debug     │  nvim-dap, neotest              │",
+    "  ├──────────────────────────────────────────────┤",
+    "  │  leader    │  Space                          │",
+    "  │  indent    │  2 spaces                       │",
+    "  ╰──────────────────────────────────────────────╯",
     ""
-  ], 12);
+  ], 10);
+}
+
+// Nix command
+async function handleNix() {
+  await appendLines([
+    "",
+    "  ╭──────────────────────────────────────────────╮",
+    "  │              Nix Environment                 │",
+    "  ├──────────────────────────────────────────────┤",
+    "  │  system    │  Linux / macOS (cross-platform) │",
+    "  │  manager   │  home-manager / nix-darwin      │",
+    "  │  shell     │  fish                           │",
+    "  ├──────────────────────────────────────────────┤",
+    "  │  packages  │  neovim, vscode, zed            │",
+    "  │  cli       │  jq, bat, fzf, zoxide, yazi     │",
+    "  │  dev       │  nodejs, bun, deno, rustc       │",
+    "  │  tools     │  git, gh, ghq, lazygit          │",
+    "  ├──────────────────────────────────────────────┤",
+    "  │  command   │  nix run .#switch               │",
+    "  ╰──────────────────────────────────────────────╯",
+    ""
+  ], 10);
+}
+
+// WezTerm command
+async function handleWezterm() {
+  await appendLines([
+    "",
+    "  ╭──────────────────────────────────────────────╮",
+    "  │            WezTerm Environment               │",
+    "  ├──────────────────────────────────────────────┤",
+    "  │  config    │  lua (modular)                  │",
+    "  │  theme     │  kanagawa (custom palette)      │",
+    "  │  opacity   │  0.90 (toggle: Ctrl+Shift+F)    │",
+    "  ├──────────────────────────────────────────────┤",
+    "  │  split-h   │  Ctrl+Shift+E                   │",
+    "  │  split-v   │  Ctrl+Shift+D                   │",
+    "  │  focus     │  Ctrl+Shift+h/j/k/l             │",
+    "  │  resize    │  Ctrl+Shift+Alt+h/j/k/l         │",
+    "  │  tab       │  Ctrl+Shift+T / W               │",
+    "  │  fullscreen│  Alt+Enter                      │",
+    "  ├──────────────────────────────────────────────┤",
+    "  │  ime       │  enabled (Japanese input)       │",
+    "  ╰──────────────────────────────────────────────╯",
+    ""
+  ], 10);
 }
 
 // Blog command
