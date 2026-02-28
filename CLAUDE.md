@@ -1,3 +1,7 @@
+# 最初にやること
+`/home/nazozokc/agents/CLAUDE.md`
+上を読み込んでください
+
 ## CLAUDE.md 要約
 
 ### プロジェクトの概要
