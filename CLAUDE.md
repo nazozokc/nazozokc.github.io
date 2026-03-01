@@ -1,6 +1,6 @@
 # 最初にやること
-`/home/nazozokc/agents/CLAUDE.md`
-上を読み込んでください
+`/home/nazozokc/agents/AGENTS.md`
+- 上のファイルをしっかり読み込んであなたがタスクを実行する際にしっかり参考にしてください。
 
 ## CLAUDE.md 要約
 
