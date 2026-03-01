@@ -212,7 +212,7 @@ body::before {
 
 .toggle-icon-sun {
   color: #fff;
-  top: 2px;
+  top: 0;
   left: 0;
   right: 0;
   bottom: 0;
@@ -221,7 +221,7 @@ body::before {
 
 .toggle-icon-moon {
   color: #fff;
-  top: 2px;
+  top: 0;
   left: 0;
   right: 0;
   bottom: 0;
@@ -230,15 +230,11 @@ body::before {
 }
 
 [data-theme="night"] .toggle-icon-moon {
-  display: flex;
+  display: block;
 }
 
 [data-theme="night"] .toggle-icon-sun {
   display: none;
-}
-
-[data-theme="night"] .toggle-icon-moon {
-  display: block;
 }
 
 /* Terminal container */
