@@ -348,6 +348,7 @@ async function handleQuit() {
 }
 
 async function handleBlog() {
+  switchToBlog();
   await appendLines([
     "",
     "<span class='accent'>blog posts:</span>",
