@@ -81,8 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-function switchToTerminal() {
-  if (!isBlogMode) return;
+function setTerminalView() {
   isBlogMode = false;
   isArticleView = false;
   if (terminalTitle) terminalTitle.textContent = 'terminal';
@@ -93,13 +92,11 @@ function switchToTerminal() {
     blogContainer.hidden = true;
     blogContainer.classList.remove('fullscreen');
   }
-  handleQuit();
 }
 
-function switchToBlog() {
-  if (isBlogMode && !isArticleView) return;
+function setBlogView(article = false) {
   isBlogMode = true;
-  isArticleView = false;
+  isArticleView = article;
   if (terminalTitle) terminalTitle.textContent = 'blog';
   if (terminalBtn) terminalBtn.classList.remove('active');
   if (blogBtn) blogBtn.classList.add('active');
@@ -108,6 +105,17 @@ function switchToBlog() {
     blogContainer.hidden = false;
     blogContainer.classList.add('fullscreen');
   }
+}
+
+function switchToTerminal() {
+  if (!isBlogMode) return;
+  setTerminalView();
+  handleQuit();
+}
+
+function switchToBlog() {
+  if (isBlogMode && !isArticleView) return;
+  setBlogView(false);
   renderBlogPosts();
 }
 
@@ -404,16 +412,7 @@ async function handleGithub() {
 
 async function handleQuit() {
   terminal.innerHTML = "";
-  isBlogMode = false;
-  isArticleView = false;
-  if (terminalTitle) terminalTitle.textContent = 'terminal';
-  if (terminalBtn) terminalBtn.classList.add('active');
-  if (blogBtn) blogBtn.classList.remove('active');
-  if (terminalContainer) terminalContainer.hidden = false;
-  if (blogContainer) {
-    blogContainer.hidden = true;
-    blogContainer.classList.remove('fullscreen');
-  }
+  setTerminalView();
   await sleep(100);
   await initTerminal();
 }
@@ -449,19 +448,8 @@ async function handleBlog() {
   backBtn.type = "button";
   backBtn.innerHTML = "← terminalに戻る";
   backBtn.onclick = () => {
-    const tc = document.getElementById('terminalContainer');
-    const bc = document.getElementById('blogContainer');
     terminal.innerHTML = "";
-    isBlogMode = false;
-    isArticleView = false;
-    if (terminalTitle) terminalTitle.textContent = 'terminal';
-    if (terminalBtn) terminalBtn.classList.add('active');
-    if (blogBtn) blogBtn.classList.remove('active');
-    if (tc) tc.hidden = false;
-    if (bc) {
-      bc.hidden = true;
-      bc.classList.remove('fullscreen');
-    }
+    setTerminalView();
     initTerminal();
   };
   terminal.appendChild(backBtn);
@@ -538,7 +526,8 @@ async function renderBlogPost(slug) {
   const blogContent = document.getElementById('blogContent');
   if (!blogContent) return;
   
-  isArticleView = true;
+  setBlogView(true);
+  
   blogContent.innerHTML = '<p class="loading">Loading...</p>';
   
   const content = await fetchBlogPost(slug);
@@ -585,19 +574,8 @@ function displayBackTop() {
   backTop.type = "button";
   backTop.innerHTML = "← [top]";
   backTop.onclick = () => {
-    const tc = document.getElementById('terminalContainer');
-    const bc = document.getElementById('blogContainer');
     terminal.innerHTML = "";
-    isBlogMode = false;
-    isArticleView = false;
-    if (terminalTitle) terminalTitle.textContent = 'terminal';
-    if (terminalBtn) terminalBtn.classList.add('active');
-    if (blogBtn) blogBtn.classList.remove('active');
-    if (tc) tc.hidden = false;
-    if (bc) {
-      bc.hidden = true;
-      bc.classList.remove('fullscreen');
-    }
+    setTerminalView();
     initTerminal();
   };
   terminal.appendChild(backTop);
@@ -612,16 +590,7 @@ function escapeHtml(text) {
 
 async function initTerminal() {
   terminal.innerHTML = "";
-  isBlogMode = false;
-  isArticleView = false;
-  if (terminalTitle) terminalTitle.textContent = 'terminal';
-  if (terminalBtn) terminalBtn.classList.add('active');
-  if (blogBtn) blogBtn.classList.remove('active');
-  if (terminalContainer) terminalContainer.hidden = false;
-  if (blogContainer) {
-    blogContainer.hidden = true;
-    blogContainer.classList.remove('fullscreen');
-  }
+  setTerminalView();
 
   createOutputLine(
     `<span class="prompt-user">nazozokc@arch</span>:<span class="prompt-path">~</span>$ <span class="cmd-highlight">whoami</span>`
