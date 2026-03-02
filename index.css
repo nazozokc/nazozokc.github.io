@@ -279,6 +279,152 @@ body::before {
   z-index: 1;
 }
 
+/* Blog container */
+.blog-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.blog-title {
+  font-size: 1.5rem;
+  color: var(--green);
+  margin: 0 0 1.5rem 0;
+  font-weight: 600;
+}
+
+.blog-posts {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.blog-post-item {
+  padding: 1.25rem;
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  border: 1px solid var(--glass-border);
+}
+
+.blog-post-title {
+  font-size: 1.1rem;
+  color: var(--fg);
+  margin: 0 0 0.5rem 0;
+  font-weight: 500;
+}
+
+.blog-post-desc {
+  color: var(--gray);
+  margin: 0 0 0.75rem 0;
+  line-height: 1.5;
+}
+
+.blog-post-meta {
+  font-size: 0.8rem;
+  color: var(--gray);
+}
+
+.blog-post-emoji {
+  font-size: 1.5rem;
+  margin-right: 0.5rem;
+}
+
+.blog-post-item {
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.blog-post-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--glow-blue);
+}
+
+.loading {
+  color: var(--gray);
+  font-style: italic;
+}
+
+.back-button {
+  background: var(--bg-secondary);
+  border: 1px solid var(--glass-border);
+  color: var(--fg);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  margin-bottom: 1.5rem;
+}
+
+.back-button:hover {
+  background: var(--glass);
+}
+
+.blog-post-content {
+  line-height: 1.7;
+}
+
+.blog-post-content h1 {
+  color: var(--green);
+  font-size: 1.5rem;
+  margin: 1.5rem 0 1rem;
+}
+
+.blog-post-content h2 {
+  color: var(--blue);
+  font-size: 1.25rem;
+  margin: 1.25rem 0 0.75rem;
+}
+
+.blog-post-content h3 {
+  color: var(--yellow);
+  font-size: 1.1rem;
+  margin: 1rem 0 0.5rem;
+}
+
+.blog-post-content p {
+  margin: 0.75rem 0;
+}
+
+.blog-post-content ul {
+  margin: 0.75rem 0;
+  padding-left: 1.5rem;
+}
+
+.blog-post-content li {
+  margin: 0.25rem 0;
+}
+
+.blog-post-content pre {
+  background: var(--bg-secondary);
+  padding: 1rem;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin: 1rem 0;
+}
+
+.blog-post-content code {
+  background: var(--bg-secondary);
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+.blog-post-content pre code {
+  background: none;
+  padding: 0;
+}
+
+.blog-post-content a {
+  color: var(--blue);
+  text-decoration: underline;
+}
+
+.blog-post-content a:hover {
+  color: var(--green);
+}
+
 .terminal-output {
   min-height: 50vh;
 }

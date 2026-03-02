@@ -1,28 +1,6 @@
 let terminal, cmdInput;
 let isBlogMode = false;
 
-// Blog posts data
-const blogPosts = [
-  {
-    title: "Neovim設定の紹介",
-    date: "2026-02-15",
-    category: "development",
-    description: "Neovimを中学生プログラマが使いこなすための設定とプラグイン紹介"
-  },
-  {
-    title: "Nix/Home Managerで環境構築",
-    date: "2026-02-01",
-    category: "configuration",
-    description: "NixとHome Managerを使って再現可能な開発環境を構築する"
-  },
-  {
-    title: "TypeScriptでCLIツールを作った",
-    date: "2026-01-20",
-    category: "development",
-    description: "TypeScriptとDenoで軽量なCLIツールを開発した話"
-  }
-];
-
 document.addEventListener('DOMContentLoaded', () => {
   terminal = document.getElementById("terminal");
   cmdInput = document.getElementById("cmdInput");
@@ -70,6 +48,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const terminalBtn = document.getElementById('terminalBtn');
   const blogBtn = document.getElementById('blogBtn');
   const terminalTitle = document.getElementById('terminalTitle');
+  const terminalContainer = document.getElementById('terminalContainer');
+  const blogContainer = document.getElementById('blogContainer');
 
   if (terminalBtn) {
     terminalBtn.addEventListener('click', () => {
@@ -89,6 +69,8 @@ document.addEventListener('DOMContentLoaded', () => {
     terminalTitle.textContent = 'terminal';
     terminalBtn.classList.add('active');
     blogBtn.classList.remove('active');
+    terminalContainer.hidden = false;
+    blogContainer.hidden = true;
     handleQuit();
   }
 
@@ -98,7 +80,9 @@ document.addEventListener('DOMContentLoaded', () => {
     terminalTitle.textContent = 'blog';
     terminalBtn.classList.remove('active');
     blogBtn.classList.add('active');
-    executeCommand('blog');
+    terminalContainer.hidden = true;
+    blogContainer.hidden = false;
+    renderBlogPosts();
   }
 });
 
@@ -345,12 +329,13 @@ async function handleBlog() {
     ""
   ], 10);
 
-  for (const post of blogPosts) {
+  const posts = await fetchBlogPosts();
+  
+  for (const post of posts) {
     const postDiv = document.createElement('div');
     postDiv.className = 'repo-item';
     postDiv.innerHTML = `
-      <div class="repo-name">${escapeHtml(post.title)}</div>
-      <div class="repo-desc">${escapeHtml(post.description)}</div>
+      <div class="repo-name">${escapeHtml(post.emoji || '')} ${escapeHtml(post.title)}</div>
       <span class="muted">${escapeHtml(post.date)} / ${escapeHtml(post.category)}</span>
     `;
     terminal.appendChild(postDiv);
@@ -367,17 +352,120 @@ async function handleBlog() {
   backBtn.type = "button";
   backBtn.innerHTML = "← terminalに戻る";
   backBtn.onclick = () => {
+    const tc = document.getElementById('terminalContainer');
+    const bc = document.getElementById('blogContainer');
     terminal.innerHTML = "";
     isBlogMode = false;
     if (terminalTitle) terminalTitle.textContent = 'terminal';
     if (terminalBtn) terminalBtn.classList.add('active');
     if (blogBtn) blogBtn.classList.remove('active');
+    if (tc) tc.hidden = false;
+    if (bc) bc.hidden = true;
     initTerminal();
   };
   terminal.appendChild(backBtn);
   scrollToBottom();
 
   createOutputLine("<span class='muted'>select command from below ↓</span>");
+}
+
+async function fetchBlogPosts() {
+  try {
+    const response = await fetch('blog-index.json');
+    if (!response.ok) throw new Error('Failed to fetch blog index');
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching blog posts:', error);
+    return [];
+  }
+}
+
+async function fetchBlogPost(slug) {
+  try {
+    const response = await fetch(`blog/${slug}.md`);
+    if (!response.ok) throw new Error('Failed to fetch blog post');
+    return await response.text();
+  } catch (error) {
+    console.error('Error fetching blog post:', error);
+    return null;
+  }
+}
+
+function renderBlogPosts() {
+  const blogContent = document.getElementById('blogContent');
+  if (!blogContent) return;
+  
+  blogContent.innerHTML = '<p class="loading">Loading...</p>';
+  
+  fetchBlogPosts().then(posts => {
+    if (posts.length === 0) {
+      blogContent.innerHTML = '<p class="muted">No blog posts found.</p>';
+      return;
+    }
+    
+    let html = `
+      <h1 class="blog-title">blog posts</h1>
+      <div class="blog-posts">
+    `;
+    
+    for (const post of posts) {
+      html += `
+        <article class="blog-post-item" data-slug="${escapeHtml(post.slug)}">
+          <span class="blog-post-emoji">${escapeHtml(post.emoji || '')}</span>
+          <h2 class="blog-post-title">${escapeHtml(post.title)}</h2>
+          <span class="blog-post-meta">${escapeHtml(post.date)} / ${escapeHtml(post.category)}</span>
+        </article>
+      `;
+    }
+    
+    html += `</div>`;
+    blogContent.innerHTML = html;
+    
+    // Add click handlers
+    document.querySelectorAll('.blog-post-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const slug = item.dataset.slug;
+        renderBlogPost(slug);
+      });
+    });
+  });
+}
+
+async function renderBlogPost(slug) {
+  const blogContent = document.getElementById('blogContent');
+  if (!blogContent) return;
+  
+  blogContent.innerHTML = '<p class="loading">Loading...</p>';
+  
+  const content = await fetchBlogPost(slug);
+  if (!content) {
+    blogContent.innerHTML = '<p class="muted">Failed to load blog post.</p>';
+    return;
+  }
+  
+  // Simple markdown parsing (headers, lists, code blocks, links)
+  let html = content
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+    .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+    .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/^\- (.+)$/gm, '<li>$1</li>')
+    .replace(/^(\d+)\. (.+)$/gm, '<li>$2</li>')
+    .replace(/\n\n/g, '</p><p>')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+  
+  // Wrap consecutive <li> elements in <ul>
+  html = html.replace(/(<li>.*<\/li>)+/g, '<ul>$&</ul>');
+  
+  // Wrap remaining text in <p>
+  html = '<div class="blog-post-content">' + html + '</div>';
+  
+  blogContent.innerHTML = `
+    <button class="back-button" onclick="renderBlogPosts()">← back</button>
+    ${html}
+  `;
+  window.scrollTo(0, 0);
 }
 
 function handleClear() {
@@ -390,11 +478,15 @@ function displayBackTop() {
   backTop.type = "button";
   backTop.innerHTML = "← [top]";
   backTop.onclick = () => {
+    const tc = document.getElementById('terminalContainer');
+    const bc = document.getElementById('blogContainer');
     terminal.innerHTML = "";
     isBlogMode = false;
     if (terminalTitle) terminalTitle.textContent = 'terminal';
     if (terminalBtn) terminalBtn.classList.add('active');
     if (blogBtn) blogBtn.classList.remove('active');
+    if (tc) tc.hidden = false;
+    if (bc) bc.hidden = true;
     initTerminal();
   };
   terminal.appendChild(backTop);
