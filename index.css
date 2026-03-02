@@ -278,48 +278,56 @@ body::before {
   position: relative;
   z-index: 1;
   display: flex;
-  flex-direction: row-reverse;
-  gap: 2rem;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.terminal-main {
+  flex: 1;
+  min-width: 0;
 }
 
 .terminal-sidebar {
   flex-shrink: 0;
-  width: 140px;
+  width: 100%;
   padding: 1.25rem;
   background: var(--glass);
   border: 1px solid var(--glass-border);
-  border-radius: 12px;
-  -webkit-backdrop-filter: blur(15px);
-  backdrop-filter: blur(15px);
+  border-radius: 16px;
+  -webkit-backdrop-filter: blur(15px) saturate(180%);
+  backdrop-filter: blur(15px) saturate(180%);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
-  height: fit-content;
-  position: sticky;
-  top: 100px;
+  opacity: 0.85;
+  order: 2;
 }
 
 .sidebar-header {
   color: var(--gray);
   font-size: 0.75rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 1px;
+  text-align: center;
 }
 
 .sidebar-commands {
   display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .sidebar-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
+  gap: 0.4rem;
+  padding: 0.4rem 0.75rem;
   cursor: pointer;
-  border-radius: 6px;
+  border-radius: 8px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  white-space: nowrap;
 }
 
 .sidebar-item::before {
@@ -335,12 +343,13 @@ body::before {
 }
 
 .sidebar-item:hover {
-  background: rgba(139, 164, 176, 0.12);
-  transform: translateX(4px);
+  background: rgba(139, 164, 176, 0.15);
 }
 
 .sidebar-item:hover::before {
   width: 3px;
+  height: 60%;
+  top: 20%;
 }
 
 .sidebar-item:hover .sidebar-cmd {
@@ -349,7 +358,7 @@ body::before {
 }
 
 .sidebar-item:active {
-  transform: translateX(4px) scale(0.98);
+  transform: scale(0.98);
 }
 
 .sidebar-num {
@@ -361,11 +370,6 @@ body::before {
   color: var(--blue);
   transition: all 0.2s ease;
   font-size: 0.9rem;
-}
-
-.terminal-main {
-  flex: 1;
-  min-width: 0;
 }
 
 /* Blog container */
@@ -801,23 +805,18 @@ body::before {
 @media (max-width: 640px) {
   .terminal-container {
     padding: 1rem;
-    flex-direction: column;
   }
 
   .terminal-sidebar {
-    width: 100%;
-    position: static;
-    margin-bottom: 1rem;
+    padding: 1rem;
   }
 
   .sidebar-commands {
-    flex-direction: row;
-    flex-wrap: wrap;
+    justify-content: flex-start;
   }
 
   .sidebar-item {
-    flex: 1 1 calc(50% - 0.25rem);
-    min-width: 100px;
+    flex: 0 0 auto;
   }
 
   .top-bar-inner {
