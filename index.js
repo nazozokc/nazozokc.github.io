@@ -26,6 +26,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  document.querySelectorAll('.sidebar-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const cmd = item.dataset.cmd;
+      executeCommand(cmd);
+    });
+    item.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        const cmd = item.dataset.cmd;
+        executeCommand(cmd);
+      }
+    });
+  });
+
   initTerminal();
 
   const themeToggle = document.getElementById('themeToggle');

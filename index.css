@@ -277,6 +277,94 @@ body::before {
   padding: 2rem 1.5rem;
   position: relative;
   z-index: 1;
+  display: flex;
+  gap: 2rem;
+}
+
+.terminal-sidebar {
+  flex-shrink: 0;
+  width: 140px;
+  padding: 1.25rem;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(15px);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+  height: fit-content;
+  position: sticky;
+  top: 100px;
+}
+
+.sidebar-header {
+  color: var(--gray);
+  font-size: 0.75rem;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.sidebar-commands {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.sidebar-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  background: linear-gradient(90deg, var(--glow-blue), transparent);
+  transition: width 0.3s ease;
+  border-radius: 6px;
+}
+
+.sidebar-item:hover {
+  background: rgba(139, 164, 176, 0.12);
+  transform: translateX(4px);
+}
+
+.sidebar-item:hover::before {
+  width: 3px;
+}
+
+.sidebar-item:hover .sidebar-cmd {
+  color: var(--yellow);
+  text-shadow: 0 0 12px var(--glow-yellow);
+}
+
+.sidebar-item:active {
+  transform: translateX(4px) scale(0.98);
+}
+
+.sidebar-num {
+  color: var(--gray);
+  font-size: 0.8rem;
+}
+
+.sidebar-cmd {
+  color: var(--blue);
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.terminal-main {
+  flex: 1;
+  min-width: 0;
 }
 
 /* Blog container */
@@ -712,6 +800,23 @@ body::before {
 @media (max-width: 640px) {
   .terminal-container {
     padding: 1rem;
+    flex-direction: column;
+  }
+
+  .terminal-sidebar {
+    width: 100%;
+    position: static;
+    margin-bottom: 1rem;
+  }
+
+  .sidebar-commands {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .sidebar-item {
+    flex: 1 1 calc(50% - 0.25rem);
+    min-width: 100px;
   }
 
   .top-bar-inner {

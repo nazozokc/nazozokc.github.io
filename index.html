@@ -37,50 +37,50 @@
 
 <!-- Terminal container -->
 <main id="terminalContainer" class="terminal-container" role="main">
-  <div id="terminal" class="terminal-output" aria-live="polite"></div>
+  <aside class="terminal-sidebar" aria-label="Command list">
+    <div class="sidebar-header" aria-hidden="true">[commands]</div>
+    <nav class="sidebar-commands" aria-label="Command navigation">
+      <div class="sidebar-item" data-cmd="neovim" role="button" tabindex="0">
+        <span class="sidebar-num">[1]</span>
+        <span class="sidebar-cmd">neovim</span>
+      </div>
+      <div class="sidebar-item" data-cmd="nix" role="button" tabindex="0">
+        <span class="sidebar-num">[2]</span>
+        <span class="sidebar-cmd">nix</span>
+      </div>
+      <div class="sidebar-item" data-cmd="wezterm" role="button" tabindex="0">
+        <span class="sidebar-num">[3]</span>
+        <span class="sidebar-cmd">wezterm</span>
+      </div>
+      <div class="sidebar-item" data-cmd="X" role="button" tabindex="0">
+        <span class="sidebar-num">[4]</span>
+        <span class="sidebar-cmd">X</span>
+      </div>
+      <div class="sidebar-item" data-cmd="github" role="button" tabindex="0">
+        <span class="sidebar-num">[5]</span>
+        <span class="sidebar-cmd">github</span>
+      </div>
+      <div class="sidebar-item" data-cmd=":q" role="button" tabindex="0">
+        <span class="sidebar-num">[6]</span>
+        <span class="sidebar-cmd">:q</span>
+      </div>
+      <div class="sidebar-item" data-cmd="clear" role="button" tabindex="0">
+        <span class="sidebar-num">[7]</span>
+        <span class="sidebar-cmd">clear</span>
+      </div>
+    </nav>
+  </aside>
 
-  <!-- Command input -->
-  <div class="input-line" role="search">
-    <span class="prompt-user" aria-hidden="true">nazozokc@arch</span>:<span class="prompt-path" aria-hidden="true">~</span>$
-    <input id="cmdInput" type="text" autocomplete="off" autofocus aria-label="Command input">
-    <span class="cursor-blink" aria-hidden="true">▌</span>
-  </div>
+  <div class="terminal-main">
+    <div id="terminal" class="terminal-output" aria-live="polite"></div>
 
-  <!-- Click commands -->
-  <section class="click-commands" aria-label="Click commands">
-    <div class="click-header" aria-hidden="true">[click to execute]</div>
-    <div class="click-grid">
-      <div class="click-item" data-cmd="neovim">
-        <span class="click-num">[1]</span>
-        <span class="click-cmd">neovim</span>
-      </div>
-      <div class="click-item" data-cmd="nix">
-        <span class="click-num">[2]</span>
-        <span class="click-cmd">nix</span>
-      </div>
-      <div class="click-item" data-cmd="wezterm">
-        <span class="click-num">[3]</span>
-        <span class="click-cmd">wezterm</span>
-      </div>
-      <div class="click-item" data-cmd="X">
-        <span class="click-num">[4]</span>
-        <span class="click-cmd">X</span>
-      </div>
-      <div class="click-item" data-cmd="github">
-        <span class="click-num">[5]</span>
-        <span class="click-cmd">github</span>
-      </div>
-      <div class="click-item" data-cmd=":q">
-        <span class="click-num">[6]</span>
-        <span class="click-cmd">:q</span>
-        <span class="click-desc">(return to top)</span>
-      </div>
-      <div class="click-item" data-cmd="clear" role="button" tabindex="0">
-        <span class="click-num" aria-hidden="true">[7]</span>
-        <span class="click-cmd">clear</span>
-      </div>
+    <!-- Command input -->
+    <div class="input-line" role="search">
+      <span class="prompt-user" aria-hidden="true">nazozokc@arch</span>:<span class="prompt-path" aria-hidden="true">~</span>$
+      <input id="cmdInput" type="text" autocomplete="off" autofocus aria-label="Command input">
+      <span class="cursor-blink" aria-hidden="true">▌</span>
     </div>
-  </section>
+  </div>
 </main>
 
 <!-- Blog container -->
