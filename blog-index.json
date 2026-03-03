@@ -12,5 +12,12 @@
     "emoji": "🐥",
     "date": "2025-01-25",
     "category": "CLI"
+  },
+  {
+    "slug": "1c2dcb06a1f750",
+    "title": "neovimプラグイン紹介",
+    "emoji": "🗂",
+    "date": "2025-02-05",
+    "category": "neovim"
   }
 ]
