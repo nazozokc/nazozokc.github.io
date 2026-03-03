@@ -130,18 +130,11 @@ async function loadBlogList() {
   if (!container) return;
 
   try {
-    let posts;
-    const cachedPosts = getCachedData(CACHE_KEY_BLOG);
-    if (cachedPosts) {
-      posts = cachedPosts;
-    } else {
-      const indexResponse = await fetch('blog-index.json');
-      if (!indexResponse.ok) {
-        throw new Error('Failed to load blog index');
-      }
-      posts = await indexResponse.json();
-      setCachedData(CACHE_KEY_BLOG, posts);
+    const indexResponse = await fetch('blog-index.json');
+    if (!indexResponse.ok) {
+      throw new Error('Failed to load blog index');
     }
+    const posts = await indexResponse.json();
 
     if (!posts || posts.length === 0) {
       container.innerHTML = '<p class="loading">No blog posts found</p>';
