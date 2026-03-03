@@ -5,26 +5,25 @@
 ## CLAUDE.md 要約
 
 ### プロジェクトの概要
-nazozokcのポートフォリオサイト。**Linuxターミナル風のUI**を持つ単一HTMLファイルのWebアプリ。
+nazozokcのポートフォリオサイト。GitHub Pagesでホストされている。
+
+---
+
+### ファイル構成
+
+| ファイル | 説明 |
+|---|---|
+| index.html | メインページ |
+| blog.html | ブログ一覧ページ |
+| index.js | 共通JS（GitHub API、blog読み込み） |
+| index.css | 共通スタイル |
+| blog-index.json | ブログ記事のインデックス |
+| blog/*.md | ブログ記事（Markdown） |
 
 ---
 
 ### 技術スタック
-HTML/CSS/Vanilla JS + GitHub REST API + Marked.js（未使用）
-
----
-
-### コマンド一覧
-
-| コマンド | 内容 |
-|---|---|
-| `neovim` | Neovim設定を表示（静的） |
-| `nix` | Nix/Home Manager設定を表示（静的） |
-| `wezterm` | WezTerm設定を表示（静的） |
-| `X` | X(Twitter)プロフィールへリンク |
-| `github` | GitHub APIからライブデータ取得・表示 |
-| `:q` | ターミナルをリセット |
-| `clear` | 出力をクリア |
+HTML/CSS/Vanilla JS + GitHub REST API
 
 ---
 
@@ -32,33 +31,22 @@ HTML/CSS/Vanilla JS + GitHub REST API + Marked.js（未使用）
 
 **パフォーマンス**
 - GitHub APIの呼び出しが直列処理で遅い → `Promise.all()`で並列化すべき
-- キャッシュなしで毎回APIを叩く → `localStorage`に保存すべき
-- Marked.jsを読み込んでるのに使ってない → 削除すべき
 
 **信頼性**
 - GitHub APIトークンなし → レート制限（60req/h）に引っかかりやすい
-- エラーメッセージが雑 → 具体的なエラー（レート制限 or ネットワークエラー）を出すべき
-
-**UX**
-- `displayBackTop()`が定義されてるのに呼ばれていない
-- コマンド履歴や補完なし
 
 ---
 
-### よくある変更パターン
+### Blogの追加方法
 
-**新コマンド追加の手順**
-1. HTMLにボタン追加
-2. `executeCommand()`のswitchにcase追加
-3. ハンドラー関数を実装
-
-**色の変更** → `:root`のCSS変数を編集するだけ
+1. `blog/*.md` にMarkdownファイルを作成
+2. `blog-index.json` に記事を追加
 
 ---
 
 ### カラースキーム（Kanagawa風）
 
 ```
-背景: #0d0c0c / テキスト: #c5c9c5
-緑: #8a9a7b / 青: #8ba4b0 / 赤: #c4746e / 黄: #c4b28a
+背景: #e8e4df / テキスト: #3d3d3d
+緑: #5a7a4b / 青: #4a6a7a / 赤: #a85450 / 黄: #8a752a
 ```

@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="nazozokcのポートフォリオ。中学生プログラマとしての活動や技術スタック、プロジェクト情報をを提供しています。">
+<meta name="description" content="nazozokcのポートフォリオ。中学生プログラマとしての活動や技術スタック、プロジェクト情報を提供しています。">
 <title>nazozokc</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <link rel="stylesheet" href="index.css">
 </head>
 <body>
-<!-- Top bar -->
 <header class="top-bar" role="banner">
   <div class="top-bar-inner">
     <div class="profile-mini">
@@ -19,6 +19,8 @@
       <span class="username">nazozokc</span>
     </div>
     <nav class="top-bar-links" aria-label="Navigation">
+      <a href="#" class="social-link active" data-view="home">Home</a>
+      <a href="#" class="social-link" data-view="blog">Blog</a>
       <button id="themeToggle" class="theme-toggle" aria-label="Toggle theme">
         <span class="toggle-track">
           <span class="toggle-thumb">
@@ -29,74 +31,82 @@
       </button>
       <a href="https://x.com/@NazozoK6519" target="_blank" rel="noopener noreferrer" class="social-link">X</a>
       <a href="https://github.com/nazozokc" target="_blank" rel="noopener noreferrer" class="social-link">GitHub</a>
-    </nav>
   </div>
+    </nav>
 </header>
 
-<!-- Main content -->
 <main class="main-content" role="main">
-  <!-- Hero section -->
-  <section class="hero-card">
-    <div class="hero-content">
-      <h1 class="hero-title">nazozokc</h1>
-      <p class="hero-subtitle">中学生プログラマ</p>
-      <p class="hero-desc">Arch Linux / Neovim / TypeScript</p>
-      <p class="hero-desc">API開発・CLIツール・環境構築が好き</p>
-    </div>
-  </section>
-
-  <!-- Skills section -->
-  <section class="card-section">
-    <h2 class="section-title">Skills</h2>
-    <div class="skills-grid">
-      <span class="skill-tag primary">TypeScript</span>
-      <span class="skill-tag secondary">JavaScript</span>
-      <span class="skill-tag secondary">Node.js</span>
-      <span class="skill-tag secondary">React</span>
-      <span class="skill-tag secondary">Linux</span>
-      <span class="skill-tag secondary">Neovim</span>
-      <span class="skill-tag secondary">Nix</span>
-      <span class="skill-tag secondary">Docker</span>
-    </div>
-  </section>
-
-  <!-- Environment section -->
-  <section class="card-section">
-    <h2 class="section-title">Environment</h2>
-    <div class="env-grid">
-      <div class="env-card">
-        <h3 class="env-title">Neovim</h3>
-        <p class="env-detail">lazy.nvim / kanagawa-dragon</p>
-        <p class="env-detail">LSP: lua_ls, ts_ls, nixd</p>
+  <!-- Home view -->
+  <div id="homeView">
+    <section class="hero-card">
+      <div class="hero-content">
+        <h1 class="hero-title">nazozokc</h1>
+        <p class="hero-subtitle">中学生プログラマ</p>
+        <p class="hero-desc">Arch Linux / Neovim / TypeScript</p>
+        <p class="hero-desc">API開発・CLIツール・環境構築が好き</p>
       </div>
-      <div class="env-card">
-        <h3 class="env-title">Nix</h3>
-        <p class="env-detail">home-manager / nix-darwin</p>
-        <p class="env-detail">shell: fish</p>
-      </div>
-      <div class="env-card">
-        <h3 class="env-title">WezTerm</h3>
-        <p class="env-detail">lua config / kanagawa theme</p>
-        <p class="env-detail">opacity: 0.90</p>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Repositories section -->
-  <section class="card-section">
-    <h2 class="section-title">Repositories</h2>
-    <div id="reposContainer" class="repos-grid">
-      <p class="loading">Loading...</p>
-    </div>
-  </section>
+    <section class="card-section">
+      <h2 class="section-title">Skills</h2>
+      <div class="skills-grid">
+        <span class="skill-tag primary">TypeScript</span>
+        <span class="skill-tag secondary">JavaScript</span>
+        <span class="skill-tag secondary">Node.js</span>
+        <span class="skill-tag secondary">React</span>
+        <span class="skill-tag secondary">Linux</span>
+        <span class="skill-tag secondary">Neovim</span>
+        <span class="skill-tag secondary">Nix</span>
+        <span class="skill-tag secondary">Docker</span>
+      </div>
+    </section>
 
-  <!-- Blog section -->
-  <section class="card-section">
-    <h2 class="section-title">Blog</h2>
-    <div id="blogContainer" class="blog-grid">
-      <p class="loading">Loading...</p>
-    </div>
-  </section>
+    <section class="card-section">
+      <h2 class="section-title">Environment</h2>
+      <div class="env-grid">
+        <div class="env-card">
+          <h3 class="env-title">Neovim</h3>
+          <p class="env-detail">lazy.nvim / kanagawa-dragon</p>
+          <p class="env-detail">LSP: lua_ls, ts_ls, nixd</p>
+        </div>
+        <div class="env-card">
+          <h3 class="env-title">Nix</h3>
+          <p class="env-detail">home-manager / nix-darwin</p>
+          <p class="env-detail">shell: fish</p>
+        </div>
+        <div class="env-card">
+          <h3 class="env-title">WezTerm</h3>
+          <p class="env-detail">lua config / kanagawa theme</p>
+          <p class="env-detail">opacity: 0.90</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card-section">
+      <h2 class="section-title">Repositories</h2>
+      <div id="reposContainer" class="repos-grid">
+        <p class="loading">Loading...</p>
+      </div>
+    </section>
+  </div>
+
+  <!-- Blog view -->
+  <div id="blogView" style="display: none;">
+    <section class="hero-card" id="blogHero">
+      <div class="hero-content">
+        <h1 class="hero-title">Blog</h1>
+        <p class="hero-subtitle">技術メモや日々の記録</p>
+      </div>
+    </section>
+
+    <div id="postContainer" class="post-container" style="display: none;"></div>
+
+    <section class="card-section" id="blogSection">
+      <div id="blogContainer" class="blog-grid">
+        <p class="loading">Loading...</p>
+      </div>
+    </section>
+  </div>
 </main>
 
 <script src="index.js"></script>

@@ -2,6 +2,9 @@ const CACHE_KEY_REPOS = 'github_repos';
 const CACHE_KEY_BLOG = 'blog_posts';
 const CACHE_EXPIRY = 5 * 60 * 1000;
 
+let currentView = 'home';
+let currentPostSlug = null;
+
 function getCachedData(key) {
   const cached = localStorage.getItem(key);
   if (!cached) return null;
@@ -22,6 +25,34 @@ function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
+}
+
+function switchView(view) {
+  const homeView = document.getElementById('homeView');
+  const blogView = document.getElementById('blogView');
+  const navLinks = document.querySelectorAll('[data-view]');
+  
+  currentView = view;
+  
+  if (view === 'home') {
+    if (homeView) homeView.style.display = 'block';
+    if (blogView) blogView.style.display = 'none';
+    currentPostSlug = null;
+    window.scrollTo(0, 0);
+  } else if (view === 'blog') {
+    if (homeView) homeView.style.display = 'none';
+    if (blogView) blogView.style.display = 'block';
+    loadBlogList();
+    window.scrollTo(0, 0);
+  }
+  
+  navLinks.forEach(link => {
+    if (link.dataset.view === view) {
+      link.classList.add('active');
+    } else {
+      link.classList.remove('active');
+    }
+  });
 }
 
 function getLanguageColor(lang) {
@@ -94,7 +125,7 @@ async function loadRepositories() {
   }
 }
 
-async function loadBlog() {
+async function loadBlogList() {
   const container = document.getElementById('blogContainer');
   if (!container) return;
 
@@ -118,7 +149,7 @@ async function loadBlog() {
     }
 
     container.innerHTML = posts.map(post => `
-      <a href="blog/${post.slug}.md" target="_blank" rel="noopener noreferrer" class="blog-card">
+      <a href="#" class="blog-card" data-post="${post.slug}">
         <div class="blog-header">
           <span class="blog-emoji">${post.emoji}</span>
           <span class="blog-date">${post.date}</span>
@@ -128,14 +159,102 @@ async function loadBlog() {
       </a>
     `).join('');
 
+    container.querySelectorAll('[data-post]').forEach(card => {
+      card.addEventListener('click', (e) => {
+        e.preventDefault();
+        loadBlogPost(card.dataset.post);
+      });
+    });
+
   } catch (err) {
     container.innerHTML = '<p class="error-msg">Failed to load blog posts</p>';
   }
 }
 
+function showBlogList() {
+  const postContainer = document.getElementById('postContainer');
+  const blogHero = document.getElementById('blogHero');
+  const blogSection = document.getElementById('blogSection');
+  
+  currentPostSlug = null;
+  if (postContainer) postContainer.style.display = 'none';
+  if (blogHero) blogHero.style.display = 'block';
+  if (blogSection) blogSection.style.display = 'block';
+}
+
+async function loadBlogPost(slug) {
+  const postContainer = document.getElementById('postContainer');
+  const blogHero = document.getElementById('blogHero');
+  const blogSection = document.getElementById('blogSection');
+
+  if (!postContainer) return;
+
+  currentPostSlug = slug;
+  postContainer.innerHTML = '<p class="loading">Loading...</p>';
+  postContainer.style.display = 'block';
+  if (blogHero) blogHero.style.display = 'none';
+  if (blogSection) blogSection.style.display = 'none';
+
+  try {
+    const response = await fetch(`blog/${slug}.md`);
+    if (!response.ok) {
+      throw new Error('Failed to load post');
+    }
+    const markdown = await response.text();
+
+    const indexResponse = await fetch('blog-index.json');
+    const posts = await indexResponse.json();
+    const post = posts.find(p => p.slug === slug);
+
+    const html = marked.parse(markdown);
+    postContainer.innerHTML = `
+      <div class="post-card">
+        <a href="#" class="back-link" id="backToList">← 一覧に戻る</a>
+        <article class="post-content">
+          <header class="post-header">
+            <div class="post-meta">
+              <span class="post-emoji">${post?.emoji || ''}</span>
+              <span class="post-date">${post?.date || ''}</span>
+              <span class="post-category">${post?.category || ''}</span>
+            </div>
+            <h1 class="post-title">${post?.title || slug}</h1>
+          </header>
+          <div class="markdown-body">${html}</div>
+        </article>
+      </div>
+    `;
+    
+    document.getElementById('backToList').addEventListener('click', (e) => {
+      e.preventDefault();
+      showBlogList();
+    });
+  } catch (err) {
+    postContainer.innerHTML = `
+      <div class="post-card">
+        <a href="#" class="back-link" id="backToList">← 一覧に戻る</a>
+        <p class="error-msg">Failed to load blog post</p>
+      </div>
+    `;
+    document.getElementById('backToList').addEventListener('click', (e) => {
+      e.preventDefault();
+      showBlogList();
+    });
+  }
+}
+
+function loadBlog() {
+  loadBlogList();
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   loadRepositories();
-  loadBlog();
+
+  document.querySelectorAll('[data-view]').forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      switchView(link.dataset.view);
+    });
+  });
 
   const themeToggle = document.getElementById('themeToggle');
   const savedTheme = localStorage.getItem('theme');
