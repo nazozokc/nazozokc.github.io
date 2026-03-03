@@ -12,19 +12,5 @@
     "emoji": "🐥",
     "date": "2025-01-25",
     "category": "CLI"
-  },
-  {
-    "slug": "a2a3a3a672da73",
-    "title": "test article",
-    "emoji": "📝",
-    "date": "2025-01-01",
-    "category": "Test"
-  },
-  {
-    "slug": "1c2dcb06a1f750",
-    "title": "hello world",
-    "emoji": "👋",
-    "date": "2025-01-01",
-    "category": "Test"
   }
 ]
