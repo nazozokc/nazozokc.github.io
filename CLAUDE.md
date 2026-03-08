@@ -13,16 +13,17 @@ nazozokcのポートフォリオサイト。GitHub Pagesでホストされてい
 
 | ファイル | 説明 |
 |---|---|
-| index.html | メインページ |
-| index.js | 共通JS（GitHub API、blog読み込み） |
-| index.css | 共通スタイル |
+| index.html | メインページ（各ビュー、ヘッダー、フッター） |
+| index.js | 共通JS（GitHub API、blog読み込み、テーマ切り替え） |
+| index.css | 共通スタイル（Kanagawa風テーマ、レスポンシブデザイン） |
 | blog-index.json | ブログ記事のインデックス |
-| blog/*.md | ブログ記事（Markdown）  |
+| blog/*.md | ブログ記事（Markdown） |
+| image/* | 画像リソース（ファビコン、プロフィール画像） |
 
 ---
 
 ### 技術スタック
-HTML/CSS/Vanilla JS + GitHub REST API
+HTML/CSS/Vanilla JS + GitHub REST API + marked.js
 
 ---
 
@@ -40,6 +41,14 @@ HTML/CSS/Vanilla JS + GitHub REST API
 
 1. `blog/*.md` にMarkdownファイルを作成
 2. `blog-index.json` に記事を追加
+
+---
+
+### ファビコンの設定方法
+
+1. `image/` に画像ファイルを配置
+2. `index.html` の `<head>` 内にある `<link rel="icon">` の `href` を変更
+3. `index.css` の `.hero-profile-image` スタイルを必要に応じて調整
 
 ---
 
