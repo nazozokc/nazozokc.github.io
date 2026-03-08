@@ -5,21 +5,66 @@ const CACHE_EXPIRY = 5 * 60 * 1000;
 let currentView = 'home';
 let currentPostSlug = null;
 
+// ─── Scroll-triggered entrance animations ───────────────────────────────────
+
+function initScrollAnimations() {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          const el = entry.target;
+          el.style.animationDelay = `${i * 0.06}s`;
+          el.classList.add('animate-in');
+          observer.unobserve(el);
+        }
+      });
+    },
+    { threshold: 0.08, rootMargin: '0px 0px -30px 0px' }
+  );
+
+  document.querySelectorAll('[data-animate]').forEach(el => observer.observe(el));
+}
+
+// ─── Count-up animation for stat values ─────────────────────────────────────
+
+function animateCount(el, target, duration = 800) {
+  if (target === '-' || isNaN(Number(target))) {
+    el.textContent = target;
+    return;
+  }
+  const end = Number(target);
+  const start = 0;
+  const range = end - start;
+  const startTime = performance.now();
+
+  function update(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+    el.textContent = Math.round(start + range * ease);
+    if (progress < 1) requestAnimationFrame(update);
+  }
+
+  requestAnimationFrame(update);
+}
+
+// ─── Cache helpers ───────────────────────────────────────────────────────────
+
 function getCachedData(key) {
   const cached = localStorage.getItem(key);
   if (!cached) return null;
   try {
     const { data, timestamp } = JSON.parse(cached);
-    if (Date.now() - timestamp < CACHE_EXPIRY) {
-      return data;
-    }
-  } catch {}
+    if (Date.now() - timestamp < CACHE_EXPIRY) return data;
+  } catch { }
   return null;
 }
 
 function setCachedData(key, data) {
   localStorage.setItem(key, JSON.stringify({ data, timestamp: Date.now() }));
 }
+
+// ─── Utils ───────────────────────────────────────────────────────────────────
 
 function escapeHtml(text) {
   const div = document.createElement('div');
@@ -30,58 +75,56 @@ function escapeHtml(text) {
 function parseFrontmatter(markdown) {
   const match = markdown.match(/^---\n([\s\S]*?)\n---/);
   if (!match) return null;
-  
-  const frontmatter = {};
+
+  const fm = {};
   const lines = match[1].split('\n');
   for (const line of lines) {
-    const colonIndex = line.indexOf(':');
-    if (colonIndex === -1) continue;
-    const key = line.slice(0, colonIndex).trim();
-    let value = line.slice(colonIndex + 1).trim();
-    if (value.startsWith('"') && value.endsWith('"')) {
-      value = value.slice(1, -1);
-    }
-    frontmatter[key] = value;
+    const ci = line.indexOf(':');
+    if (ci === -1) continue;
+    const key = line.slice(0, ci).trim();
+    let value = line.slice(ci + 1).trim();
+    if (value.startsWith('"') && value.endsWith('"')) value = value.slice(1, -1);
+    fm[key] = value;
   }
-  return frontmatter;
+  return fm;
 }
+
+// ─── View switching ──────────────────────────────────────────────────────────
 
 function switchView(view) {
   const homeView = document.getElementById('homeView');
   const blogView = document.getElementById('blogView');
   const zennView = document.getElementById('zennView');
   const navLinks = document.querySelectorAll('[data-view]');
-  
+
   currentView = view;
-  
+
   if (view === 'home') {
-    if (homeView) homeView.style.display = 'block';
-    if (blogView) blogView.style.display = 'none';
-    if (zennView) zennView.style.display = 'none';
+    homeView?.style.setProperty('display', 'block');
+    blogView?.style.setProperty('display', 'none');
+    zennView?.style.setProperty('display', 'none');
     currentPostSlug = null;
     window.scrollTo(0, 0);
   } else if (view === 'blog') {
-    if (homeView) homeView.style.display = 'none';
-    if (blogView) blogView.style.display = 'block';
-    if (zennView) zennView.style.display = 'none';
+    homeView?.style.setProperty('display', 'none');
+    blogView?.style.setProperty('display', 'block');
+    zennView?.style.setProperty('display', 'none');
     loadBlogList();
     window.scrollTo(0, 0);
   } else if (view === 'zenn') {
-    if (homeView) homeView.style.display = 'none';
-    if (blogView) blogView.style.display = 'none';
-    if (zennView) zennView.style.display = 'block';
+    homeView?.style.setProperty('display', 'none');
+    blogView?.style.setProperty('display', 'none');
+    zennView?.style.setProperty('display', 'block');
     loadZennArticles();
     window.scrollTo(0, 0);
   }
-  
+
   navLinks.forEach(link => {
-    if (link.dataset.view === view) {
-      link.classList.add('active');
-    } else {
-      link.classList.remove('active');
-    }
+    link.classList.toggle('active', link.dataset.view === view);
   });
 }
+
+// ─── Language colors ─────────────────────────────────────────────────────────
 
 function getLanguageColor(lang) {
   const colors = {
@@ -92,50 +135,44 @@ function getLanguageColor(lang) {
     Go: '#00ADD8',
     HTML: '#e34c26',
     CSS: '#563d7c',
-    Shell: '#89e051'
+    Shell: '#89e051',
+    Nix: '#7e7eff',
+    Lua: '#000080',
   };
   return colors[lang] || '#858585';
 }
+
+// ─── Load repositories ───────────────────────────────────────────────────────
 
 async function loadRepositories() {
   const container = document.getElementById('reposContainer');
   if (!container) return;
 
   try {
-    let repos;
-    const cachedRepos = getCachedData(CACHE_KEY_REPOS);
-    if (cachedRepos) {
-      repos = cachedRepos;
-    } else {
-      const response = await fetch("https://api.github.com/users/nazozokc/repos?sort=updated&per_page=20");
-      if (!response.ok) {
-        if (response.status === 403 || response.status === 429) {
-          throw new Error('rate_limit');
-        }
-        throw new Error('network');
-      }
-      repos = await response.json();
+    let repos = getCachedData(CACHE_KEY_REPOS);
+    if (!repos) {
+      const res = await fetch('https://api.github.com/users/nazozokc/repos?sort=updated&per_page=20');
+      if (!res.ok) throw new Error(res.status === 403 || res.status === 429 ? 'rate_limit' : 'network');
+      repos = await res.json();
       setCachedData(CACHE_KEY_REPOS, repos);
     }
 
-    const filteredRepos = repos.filter(r => !r.fork).slice(0, 8);
-
-    if (filteredRepos.length === 0) {
+    const filtered = repos.filter(r => !r.fork).slice(0, 8);
+    if (filtered.length === 0) {
       container.innerHTML = '<p class="loading">No repositories found</p>';
       return;
     }
 
-    container.innerHTML = filteredRepos.map(repo => `
+    container.innerHTML = filtered.map(repo => `
       <a href="${repo.html_url}" target="_blank" rel="noopener noreferrer" class="repo-card">
         <div class="repo-name">${escapeHtml(repo.name)}</div>
         <p class="repo-desc">${escapeHtml(repo.description || 'No description')}</p>
         <div class="repo-meta">
           ${repo.language ? `
             <span class="repo-language">
-              <span class="language-dot" style="background: ${getLanguageColor(repo.language)}"></span>
+              <span class="language-dot" style="background:${getLanguageColor(repo.language)}"></span>
               ${escapeHtml(repo.language)}
-            </span>
-          ` : ''}
+            </span>` : ''}
           <span>★ ${repo.stargazers_count}</span>
           <span>⑂ ${repo.forks_count}</span>
         </div>
@@ -143,15 +180,13 @@ async function loadRepositories() {
     `).join('');
 
   } catch (err) {
-    if (err.message === 'rate_limit') {
-      container.innerHTML = '<p class="error-msg">API rate limit exceeded. Please try again later.</p>';
-    } else if (err.message === 'network') {
-      container.innerHTML = '<p class="error-msg">Network error. Please check your connection.</p>';
-    } else {
-      container.innerHTML = '<p class="error-msg">Failed to load repositories</p>';
-    }
+    container.innerHTML = err.message === 'rate_limit'
+      ? '<p class="error-msg">API rate limit exceeded. Try again later.</p>'
+      : '<p class="error-msg">Failed to load repositories</p>';
   }
 }
+
+// ─── Contribution stats ───────────────────────────────────────────────────────
 
 async function loadContributionStats() {
   const totalEl = document.getElementById('totalContributions');
@@ -159,81 +194,72 @@ async function loadContributionStats() {
   if (!totalEl || !todayEl) return;
 
   try {
-    let events;
-    const cachedEvents = getCachedData(CACHE_KEY_EVENTS);
-    if (cachedEvents) {
-      events = cachedEvents;
-    } else {
-      const response = await fetch('https://api.github.com/users/nazozokc/events?per_page=100');
-      if (!response.ok) {
-        if (response.status === 403 || response.status === 429) {
-          throw new Error('rate_limit');
-        }
-        throw new Error('network');
-      }
-      events = await response.json();
+    let events = getCachedData(CACHE_KEY_EVENTS);
+    if (!events) {
+      const res = await fetch('https://api.github.com/users/nazozokc/events?per_page=100');
+      if (!res.ok) throw new Error(res.status === 403 || res.status === 429 ? 'rate_limit' : 'network');
+      events = await res.json();
       setCachedData(CACHE_KEY_EVENTS, events);
     }
 
     const now = new Date();
     const today = now.toDateString();
     const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
-
-    let totalCount = 0;
-    let todayCount = 0;
+    let totalCount = 0, todayCount = 0;
 
     for (const event of events) {
       if (event.type !== 'PushEvent') continue;
       const eventDate = new Date(event.created_at);
       if (eventDate < ninetyDaysAgo) continue;
-
       totalCount += event.payload.commits?.length || 0;
       if (eventDate.toDateString() === today) {
         todayCount += event.payload.commits?.length || 0;
       }
     }
 
-    totalEl.textContent = totalCount;
-    todayEl.textContent = todayCount;
+    animateCount(totalEl, totalCount);
+    animateCount(todayEl, todayCount);
 
-  } catch (err) {
+  } catch {
     totalEl.textContent = '-';
     todayEl.textContent = '-';
   }
 }
+
+// ─── Blog list ───────────────────────────────────────────────────────────────
 
 async function loadBlogList() {
   const container = document.getElementById('blogContainer');
   if (!container) return;
 
   try {
-    const manifestResponse = await fetch('blog-manifest.json');
-    if (!manifestResponse.ok) {
-      throw new Error('Failed to load blog manifest');
-    }
-    const slugs = await manifestResponse.json();
+    const manifestRes = await fetch('blog-manifest.json');
+    if (!manifestRes.ok) throw new Error('manifest');
+    const slugs = await manifestRes.json();
 
     const postFiles = await Promise.all(
-      slugs.map(slug => fetch(`blog/${slug}.md`)
-        .then(r => r.ok ? r.text() : Promise.resolve(null))
-        .catch(() => null))
+      slugs.map(slug =>
+        fetch(`blog/${slug}.md`)
+          .then(r => r.ok ? r.text() : null)
+          .catch(() => null)
+      )
     );
 
-    const posts = [];
-    for (let i = 0; i < slugs.length; i++) {
-      const markdown = postFiles[i];
-      if (!markdown) continue;
-      const frontmatter = parseFrontmatter(markdown);
-      if (frontmatter) {
-        posts.push({
-          slug: slugs[i],
-          title: frontmatter.title || slugs[i],
-          emoji: frontmatter.emoji || '',
-          date: frontmatter.date || '',
-          category: frontmatter.category || ''
-        });
-      }
-    }
+    const posts = slugs
+      .map((slug, i) => {
+        const markdown = postFiles[i];
+        if (!markdown) return null;
+        const fm = parseFrontmatter(markdown);
+        if (!fm) return null;
+        return {
+          slug,
+          title: fm.title || slug,
+          emoji: fm.emoji || '📝',
+          date: fm.date || '',
+          category: fm.category || '',
+        };
+      })
+      .filter(Boolean);
 
     if (posts.length === 0) {
       container.innerHTML = '<p class="loading">No blog posts found</p>';
@@ -252,27 +278,27 @@ async function loadBlogList() {
     `).join('');
 
     container.querySelectorAll('[data-post]').forEach(card => {
-      card.addEventListener('click', (e) => {
+      card.addEventListener('click', e => {
         e.preventDefault();
         loadBlogPost(card.dataset.post);
       });
     });
 
-  } catch (err) {
+  } catch {
     container.innerHTML = '<p class="error-msg">Failed to load blog posts</p>';
   }
 }
+
+// ─── Zenn articles ────────────────────────────────────────────────────────────
 
 async function loadZennArticles() {
   const container = document.getElementById('zennContainer');
   if (!container) return;
 
   try {
-    const response = await fetch('https://zenn.dev/api/articles?username=nazozokc&order=latest');
-    if (!response.ok) {
-      throw new Error('Failed to fetch Zenn articles');
-    }
-    const data = await response.json();
+    const res = await fetch('https://zenn.dev/api/articles?username=nazozokc&order=latest');
+    if (!res.ok) throw new Error('zenn');
+    const data = await res.json();
     const articles = data.articles || [];
 
     if (articles.length === 0) {
@@ -297,11 +323,13 @@ async function loadZennArticles() {
   }
 }
 
+// ─── Blog post ───────────────────────────────────────────────────────────────
+
 function showBlogList() {
   const postContainer = document.getElementById('postContainer');
   const blogHero = document.getElementById('blogHero');
   const blogSection = document.getElementById('blogSection');
-  
+
   currentPostSlug = null;
   if (postContainer) postContainer.style.display = 'none';
   if (blogHero) blogHero.style.display = 'block';
@@ -312,81 +340,69 @@ async function loadBlogPost(slug) {
   const postContainer = document.getElementById('postContainer');
   const blogHero = document.getElementById('blogHero');
   const blogSection = document.getElementById('blogSection');
-
   if (!postContainer) return;
 
   currentPostSlug = slug;
-  postContainer.innerHTML = '<p class="loading">Loading...</p>';
+  postContainer.innerHTML = '<p class="loading">Loading</p>';
   postContainer.style.display = 'block';
   if (blogHero) blogHero.style.display = 'none';
   if (blogSection) blogSection.style.display = 'none';
+  window.scrollTo(0, 0);
 
   try {
-    const response = await fetch(`blog/${slug}.md`);
-    if (!response.ok) {
-      throw new Error('Failed to load post');
-    }
-    const markdown = await response.text();
-
-    const frontmatter = parseFrontmatter(markdown);
+    const res = await fetch(`blog/${slug}.md`);
+    if (!res.ok) throw new Error('load');
+    const markdown = await res.text();
+    const fm = parseFrontmatter(markdown);
     const html = marked.parse(markdown.replace(/^---[\s\S]*?---\n/, ''));
-    
+
     postContainer.innerHTML = `
       <div class="post-card">
         <a href="#" class="back-link" id="backToList">← 一覧に戻る</a>
         <article class="post-content">
           <header class="post-header">
             <div class="post-meta">
-              <span class="post-emoji">${escapeHtml(frontmatter?.emoji || '')}</span>
-              <span class="post-date">${escapeHtml(frontmatter?.date || '')}</span>
-              <span class="post-category">${escapeHtml(frontmatter?.category || '')}</span>
+              <span class="post-emoji">${escapeHtml(fm?.emoji || '')}</span>
+              <span class="post-date">${escapeHtml(fm?.date || '')}</span>
+              <span class="post-category">${escapeHtml(fm?.category || '')}</span>
             </div>
-            <h1 class="post-title">${escapeHtml(frontmatter?.title || slug)}</h1>
+            <h1 class="post-title">${escapeHtml(fm?.title || slug)}</h1>
           </header>
           <div class="markdown-body">${html}</div>
         </article>
       </div>
     `;
-    
-    document.getElementById('backToList').addEventListener('click', (e) => {
+
+    document.getElementById('backToList').addEventListener('click', e => {
       e.preventDefault();
       showBlogList();
     });
-  } catch (err) {
+
+  } catch {
     postContainer.innerHTML = `
       <div class="post-card">
         <a href="#" class="back-link" id="backToList">← 一覧に戻る</a>
-        <p class="error-msg">Failed to load blog post</p>
+        <p class="error-msg">Failed to load post</p>
       </div>
     `;
-    document.getElementById('backToList').addEventListener('click', (e) => {
+    document.getElementById('backToList').addEventListener('click', e => {
       e.preventDefault();
       showBlogList();
     });
   }
 }
 
+// ─── Init ─────────────────────────────────────────────────────────────────────
+
 document.addEventListener('DOMContentLoaded', () => {
-  Promise.all([
-    loadRepositories(),
-    loadContributionStats()
-  ]);
-
-  document.querySelectorAll('[data-view]').forEach(link => {
-    link.addEventListener('click', (e) => {
-      e.preventDefault();
-      switchView(link.dataset.view);
-    });
-  });
-
+  // Theme
   const themeToggle = document.getElementById('themeToggle');
-  const savedTheme = localStorage.getItem('theme');
-  if (savedTheme === 'night') {
+  if (localStorage.getItem('theme') === 'night') {
     document.documentElement.setAttribute('data-theme', 'night');
   }
-  themeToggle.addEventListener('click', () => {
-    const current = document.documentElement.getAttribute('data-theme');
-    if (current === 'night') {
+  themeToggle?.addEventListener('click', () => {
+    const isNight = document.documentElement.getAttribute('data-theme') === 'night';
+    if (isNight) {
       document.documentElement.removeAttribute('data-theme');
       localStorage.setItem('theme', 'day');
     } else {
@@ -394,4 +410,18 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('theme', 'night');
     }
   });
+
+  // Nav
+  document.querySelectorAll('[data-view]').forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      switchView(link.dataset.view);
+    });
+  });
+
+  // Data
+  Promise.all([loadRepositories(), loadContributionStats()]);
+
+  // Scroll animations (slight delay so initial render is done)
+  requestAnimationFrame(() => initScrollAnimations());
 });
