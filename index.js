@@ -240,8 +240,8 @@ async function loadContributionStats() {
 
   } catch (err) {
     console.error('Contribution stats load error:', err);
-    totalEl.textContent = '-';
-    todayEl.textContent = '-';
+    totalEl.textContent = err.message === 'rate_limit' ? 'API制限' : '-';
+    todayEl.textContent = err.message === 'rate_limit' ? 'API制限' : '-';
   }
 }
 
