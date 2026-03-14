@@ -27,6 +27,20 @@ function initScrollAnimations() {
   document.querySelectorAll('[data-animate]').forEach(el => observer.observe(el));
 }
 
+// スキルバーをIntersectionObserverで起動
+function initSkillBars() {
+  const bars = document.querySelectorAll('.skill-fill');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('animated');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.3 });
+  bars.forEach(bar => observer.observe(bar));
+}
+
 // ─── Count-up animation for stat values ─────────────────────────────────────
 
 function animateCount(el, target, duration = 800) {
@@ -469,5 +483,8 @@ document.addEventListener('DOMContentLoaded', () => {
   startBlogPolling();
 
   // Scroll animations (slight delay so initial render is done)
-  requestAnimationFrame(() => initScrollAnimations());
+  requestAnimationFrame(() => {
+    initScrollAnimations();
+    initSkillBars();
+  });
 });
