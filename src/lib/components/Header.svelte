@@ -29,7 +29,7 @@
 				</a>
 			{/each}
 			<ThemeToggle />
-			<a href="https://x.com/@NazozoK6519" target="_blank" rel="noopener noreferrer" class="nav-link">X</a>
+			<a href="https://x.com/@nazozokc" target="_blank" rel="noopener noreferrer" class="nav-link">X</a>
 			<a href="https://github.com/nazozokc" target="_blank" rel="noopener noreferrer" class="nav-link">GitHub</a>
 		</nav>
 	</div>
