@@ -11,43 +11,55 @@ export interface BlogPostMeta {
 
 export interface BlogPost {
 	meta: BlogPostMeta;
-	html: string;
+	markdown: string;
 }
 
+const BLOG_DIR = path.resolve('blog');
+const MANIFEST_PATH = path.resolve('static/blog-manifest.json');
+const SLUG_PATTERN = /^[a-zA-Z0-9_-]+$/;
+
 function parseFrontmatter(markdown: string): Record<string, string> | null {
-	const match = markdown.match(/^---\n([\s\S]*?)\n---/);
+	const normalized = markdown.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n');
+	const match = normalized.match(/^---\n([\s\S]*?)\n---(?:\n|$)/);
 	if (!match) return null;
 
 	const fm: Record<string, string> = Object.create(null);
-	const lines = match[1].split('\n');
-	for (const line of lines) {
+	for (const line of match[1].split('\n')) {
 		const ci = line.indexOf(':');
 		if (ci === -1) continue;
 		const key = line.slice(0, ci).trim();
 		let value = line.slice(ci + 1).trim();
-		if (value.startsWith('"') && value.endsWith('"')) value = value.slice(1, -1);
+		if (
+			(value.startsWith('"') && value.endsWith('"')) ||
+			(value.startsWith("'") && value.endsWith("'"))
+		) {
+			value = value.slice(1, -1);
+		}
 		fm[key] = value;
 	}
 	return fm;
 }
 
 export async function getBlogSlugs(): Promise<string[]> {
-	const manifestPath = path.resolve('static/blog-manifest.json');
-	const raw = fs.readFileSync(manifestPath, 'utf-8');
+	const raw = fs.readFileSync(MANIFEST_PATH, 'utf-8');
 	const manifest = JSON.parse(raw);
-	return Array.isArray(manifest) ? manifest : manifest.posts || [];
+	const slugs = Array.isArray(manifest) ? manifest : manifest.posts;
+	if (!Array.isArray(slugs)) return [];
+	return slugs.filter((slug): slug is string => typeof slug === 'string' && SLUG_PATTERN.test(slug));
 }
 
 export function getBlogPost(slug: string): BlogPost | null {
-	const filePath = path.resolve('blog', `${slug}.md`);
+	if (!SLUG_PATTERN.test(slug)) return null;
+
+	const filePath = path.join(BLOG_DIR, `${slug}.md`);
 	if (!fs.existsSync(filePath)) return null;
 
-	const markdown = fs.readFileSync(filePath, 'utf-8');
-	const fm = parseFrontmatter(markdown);
+	const source = fs.readFileSync(filePath, 'utf-8').replace(/^\uFEFF/, '').replace(/\r\n/g, '\n');
+	const fm = parseFrontmatter(source);
 	if (!fm) return null;
 
-	// Strip frontmatter and render markdown
-	const body = markdown.replace(/^---[\s\S]*?---\n/, '');
+	// Strip frontmatter; the body stays as Markdown so it can be rendered at build time.
+	const body = source.replace(/^---\n[\s\S]*?\n---(?:\n|$)/, '');
 
 	return {
 		meta: {
@@ -57,16 +69,12 @@ export function getBlogPost(slug: string): BlogPost | null {
 			date: fm.date || '',
 			category: fm.category || ''
 		},
-		html: body
+		markdown: body
 	};
 }
 
-export function getAllBlogPosts(): BlogPost[] {
-	const slugs = getBlogSlugs();
-	const posts: BlogPost[] = [];
-	for (const slug of slugs) {
-		const post = getBlogPost(slug.toString());
-		if (post) posts.push(post);
-	}
-	return posts;
+/** Sort posts newest-first. Dates may be written as `2025-3-15` or `2025-03-15`. */
+export function getPostTimestamp(date: string): number {
+	const timestamp = Date.parse(date.replace(/-/g, '/'));
+	return Number.isNaN(timestamp) ? 0 : timestamp;
 }

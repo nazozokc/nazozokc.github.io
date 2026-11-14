@@ -1,17 +1,16 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import AnimateOnView from '$lib/components/AnimateOnView.svelte';
-	import { skillCategories, environmentCards, interests, wipItems, timeline } from '$lib/data/skills';
-	import { getLanguageColor, fetchRepos, fetchContributionStats } from '$lib/utils/github';
-	import type { GitHubRepo } from '$lib/utils/github';
+	import AnimateOnView from '#lib/components/AnimateOnView.svelte';
+	import AnimatedNumber from '#lib/components/AnimatedNumber.svelte';
+	import { skillCategories, environmentCards, interests, wipItems, timeline } from '#lib/data/skills.js';
+	import { getLanguageColor, fetchRepos, fetchContributionStats } from '#lib/utils/github.js';
+	import type { GitHubRepo } from '#lib/utils/github.js';
 
 	let repos = $state<GitHubRepo[]>([]);
 	let repoError = $state<string | null>(null);
 	let totalContributions = $state<number | null>(null);
 	let todayContributions = $state<number | null>(null);
 	let statsError = $state<string | null>(null);
-	let displayTotal = $state<string>('-');
-	let displayToday = $state<string>('-');
 
 	onMount(() => {
 		loadRepos();
@@ -21,9 +20,11 @@
 	async function loadRepos() {
 		try {
 			const data = await fetchRepos();
-			repos = data.filter(r => !r.fork).slice(0, 8);
-		} catch (err: any) {
-			repoError = err.message === 'rate_limit' ? 'API制限に達しました。しばらくお待ちください。' : 'リポジトリの読み込みに失敗しました';
+			repos = data.filter((repo) => !repo.fork).slice(0, 8);
+		} catch (err) {
+			repoError = err instanceof Error && err.message === 'rate_limit'
+				? 'API制限に達しました。しばらくお待ちください。'
+				: 'リポジトリの読み込みに失敗しました';
 		}
 	}
 
@@ -32,36 +33,16 @@
 			const stats = await fetchContributionStats();
 			totalContributions = stats.total;
 			todayContributions = stats.today;
-			animateCount('totalCount', stats.total);
-			animateCount('todayCount', stats.today);
-		} catch (err: any) {
-			statsError = err.message === 'rate_limit' ? 'API制限' : 'エラー';
+		} catch (err) {
+			statsError = err instanceof Error && err.message === 'rate_limit' ? 'API制限' : 'エラー';
 		}
-	}
-
-	function animateCount(id: string, target: number) {
-		const el: HTMLElement | null = document.getElementById(id);
-		if (!el) return;
-		const duration = 800;
-		const start = 0;
-		const range = target - start;
-		const startTime = performance.now();
-
-		function update(now: number) {
-			const elapsed = now - startTime;
-			const progress = Math.min(elapsed / duration, 1);
-			const ease = 1 - Math.pow(1 - progress, 3);
-			(el as HTMLElement).textContent = String(Math.round(start + range * ease));
-			if (progress < 1) requestAnimationFrame(update);
-		}
-		requestAnimationFrame(update);
 	}
 </script>
 
 <!-- Hero -->
 <section class="hero-card">
 	<div class="hero-content">
-		<img src="image/icon.jpg" alt="nazozokc" class="hero-profile-image" />
+		<img src="/image/icon.jpg" alt="nazozokc" class="hero-profile-image" />
 		<h1 class="hero-title">nazozokc</h1>
 		<p class="hero-subtitle">ITオタク・エンジニア志望</p>
 		<p class="hero-desc">Arch Linux / Neovim / TypeScript</p>
@@ -141,16 +122,32 @@
 <AnimateOnView>
 	<section class="card-section">
 		<h2 class="section-title">Stats</h2>
-		<div class="stats-grid">
-			<div class="stat-card">
-				<div class="stat-value" id="totalCount">{displayTotal}</div>
-				<div class="stat-label">Total / 90 days</div>
+		{#if statsError}
+			<p class="error-msg">{statsError}</p>
+		{:else}
+			<div class="stats-grid">
+				<div class="stat-card">
+					<div class="stat-value">
+						{#if totalContributions === null}
+							-
+						{:else}
+							<AnimatedNumber value={totalContributions} />
+						{/if}
+					</div>
+					<div class="stat-label">Total / 90 days</div>
+				</div>
+				<div class="stat-card">
+					<div class="stat-value">
+						{#if todayContributions === null}
+							-
+						{:else}
+							<AnimatedNumber value={todayContributions} />
+						{/if}
+					</div>
+					<div class="stat-label">Today</div>
+				</div>
 			</div>
-			<div class="stat-card">
-				<div class="stat-value" id="todayCount">{displayToday}</div>
-				<div class="stat-label">Today</div>
-			</div>
-		</div>
+		{/if}
 	</section>
 </AnimateOnView>
 

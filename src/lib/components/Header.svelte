@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { page } from '$app/stores';
+	import { page } from '$app/state';
 	import ThemeToggle from './ThemeToggle.svelte';
 
 	const navItems = [
@@ -22,14 +22,16 @@
 				<a
 					href={item.path}
 					class="nav-link"
-					class:active={$page.url.pathname === item.path}
+					class:active={item.path === '/'
+						? page.url.pathname === '/'
+						: page.url.pathname === item.path || page.url.pathname.startsWith(`${item.path}/`)}
 					data-sveltekit-preload-data="hover"
 				>
 					{item.label}
 				</a>
 			{/each}
 			<ThemeToggle />
-			<a href="https://x.com/@nazozokc" target="_blank" rel="noopener noreferrer" class="nav-link">X</a>
+			<a href="https://x.com/nazozokc" target="_blank" rel="noopener noreferrer" class="nav-link">X</a>
 			<a href="https://github.com/nazozokc" target="_blank" rel="noopener noreferrer" class="nav-link">GitHub</a>
 		</nav>
 	</div>
