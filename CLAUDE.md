@@ -46,7 +46,7 @@ npm run preview  # ビルド成果物のプレビュー
 ## ブログ追加方法
 
 1. `blog/*.md` にMarkdownファイルを作成 (frontmatter付き)
-2. `blog-manifest.json` の `posts` 配列にslugを追加
+2. `static/blog-manifest.json` の `posts` 配列にslugを追加
 
 ## カラースキーム (Kanagawa風)
 

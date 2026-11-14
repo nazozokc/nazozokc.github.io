@@ -3,13 +3,21 @@
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<base href="/" />
 	<meta name="description" content="nazozokcのポートフォリオ。中学生プログラマとしての活動や技術スタック、プロジェクト情報を提供しています。" />
+	<script>
+		try {
+			if (localStorage.getItem('theme') === 'night') {
+				document.documentElement.setAttribute('data-theme', 'night');
+			}
+		} catch (e) {
+			// Ignore storage access errors.
+		}
+	</script>
 	<title>nazozokc</title>
 	<link rel="preconnect" href="https://fonts.googleapis.com" />
 	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 	<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-	<link rel="icon" href="image/icon.jpg" />
+	<link rel="icon" href="/image/icon.jpg" />
 	%sveltekit.head%
 </head>
 <body data-sveltekit-prerender="true">

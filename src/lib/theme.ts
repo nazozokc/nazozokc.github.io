@@ -2,9 +2,17 @@ import { writable } from 'svelte/store';
 
 export type Theme = 'day' | 'night';
 
+function readStoredTheme(): Theme {
+	if (typeof window === 'undefined') return 'day';
+	try {
+		return localStorage.getItem('theme') === 'night' ? 'night' : 'day';
+	} catch {
+		return 'day';
+	}
+}
+
 function createThemeStore() {
-	const initial = (typeof localStorage !== 'undefined' ? localStorage.getItem('theme') : null) as Theme | null;
-	const { subscribe, set, update } = writable<Theme>(initial ?? 'day');
+	const { subscribe, set, update } = writable<Theme>(readStoredTheme());
 
 	subscribe((value) => {
 		if (typeof document === 'undefined') return;
@@ -13,8 +21,10 @@ function createThemeStore() {
 		} else {
 			document.documentElement.removeAttribute('data-theme');
 		}
-		if (typeof localStorage !== 'undefined') {
+		try {
 			localStorage.setItem('theme', value);
+		} catch {
+			// Storage can be unavailable (private mode, quota); theme still applies for this page view.
 		}
 	});
 

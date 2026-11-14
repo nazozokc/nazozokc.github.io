@@ -1,7 +1,9 @@
 import { getCachedData, setCachedData } from './cache';
 
+const GITHUB_USER = 'nazozokc';
 const CACHE_KEY_REPOS = 'github_repos';
-const CACHE_KEY_EVENTS = 'github_events';
+const CACHE_KEY_STATS = 'github_stats';
+const GITHUB_HEADERS = { Accept: 'application/vnd.github+json' };
 
 const LANGUAGE_COLORS: Record<string, string> = {
 	TypeScript: '#3178c6',
@@ -34,9 +36,13 @@ export async function fetchRepos(): Promise<GitHubRepo[]> {
 	const cached = getCachedData<GitHubRepo[]>(CACHE_KEY_REPOS);
 	if (cached) return cached;
 
-	const res = await fetch('https://api.github.com/users/nazozokc/repos?sort=updated&per_page=20');
+	const res = await fetch(
+		`https://api.github.com/users/${GITHUB_USER}/repos?sort=updated&per_page=20`,
+		{ headers: GITHUB_HEADERS }
+	);
 	if (!res.ok) throw new Error(res.status === 403 || res.status === 429 ? 'rate_limit' : 'network');
-	const repos: GitHubRepo[] = await res.json();
+	const data = await res.json();
+	const repos = Array.isArray(data) ? (data as GitHubRepo[]) : [];
 	setCachedData(CACHE_KEY_REPOS, repos);
 	return repos;
 }
@@ -46,37 +52,41 @@ export interface ContributionStats {
 	today: number;
 }
 
+function toIsoDate(date: Date): string {
+	return date.toISOString().slice(0, 10);
+}
+
+/**
+ * Count commits with the public commit search API.
+ * The events API no longer includes `payload.commits`, so it cannot be used
+ * to count commits (it reports 0 for every PushEvent).
+ */
+async function countCommitsSince(date: string): Promise<number> {
+	const params = new URLSearchParams({
+		q: `author:${GITHUB_USER} committer-date:>=${date}`,
+		per_page: '1'
+	});
+	const res = await fetch(`https://api.github.com/search/commits?${params}`, {
+		headers: GITHUB_HEADERS
+	});
+	if (!res.ok) throw new Error(res.status === 403 || res.status === 429 ? 'rate_limit' : 'network');
+	const data = await res.json();
+	return typeof data.total_count === 'number' ? data.total_count : 0;
+}
+
 export async function fetchContributionStats(): Promise<ContributionStats> {
-	const cached = getCachedData<ContributionStats>(CACHE_KEY_EVENTS);
+	const cached = getCachedData<ContributionStats>(CACHE_KEY_STATS);
 	if (cached) return cached;
 
-	const allEvents: any[] = [];
-	const baseUrl = 'https://api.github.com/users/nazozokc/events?per_page=100';
-	for (let page = 1; page <= 3; page++) {
-		const url = page === 1 ? baseUrl : `${baseUrl}&page=${page}`;
-		const res = await fetch(url);
-		if (!res.ok) throw new Error(res.status === 403 || res.status === 429 ? 'rate_limit' : 'network');
-		const data = await res.json();
-		if (data.length === 0) break;
-		allEvents.push(...data);
-	}
-
 	const now = new Date();
-	const today = now.toDateString();
 	const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
-	let totalCount = 0, todayCount = 0;
 
-	for (const event of allEvents) {
-		if (event.type !== 'PushEvent') continue;
-		const eventDate = new Date(event.created_at);
-		if (eventDate < ninetyDaysAgo) continue;
-		totalCount += event.payload.commits?.length || 0;
-		if (eventDate.toDateString() === today) {
-			todayCount += event.payload.commits?.length || 0;
-		}
-	}
+	const [total, today] = await Promise.all([
+		countCommitsSince(toIsoDate(ninetyDaysAgo)),
+		countCommitsSince(toIsoDate(now))
+	]);
 
-	const stats: ContributionStats = { total: totalCount, today: todayCount };
-	setCachedData(CACHE_KEY_EVENTS, stats);
+	const stats: ContributionStats = { total, today };
+	setCachedData(CACHE_KEY_STATS, stats);
 	return stats;
 }

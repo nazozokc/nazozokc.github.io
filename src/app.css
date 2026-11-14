@@ -1203,10 +1203,17 @@ a.wip-link:hover {
 @media (max-width: 640px) {
 	.top-bar-inner {
 		padding: 0.7rem 1rem;
+		gap: 0.5rem;
+	}
+	.profile-mini .username {
+		display: none;
+	}
+	.top-bar-links {
+		gap: 0.3rem;
 	}
 	.nav-link {
-		font-size: 0.78rem;
-		padding: 0.3rem 0.65rem;
+		font-size: 0.75rem;
+		padding: 0.3rem 0.5rem;
 	}
 	.main-content {
 		padding: 1.25rem 1rem 3.5rem;
@@ -1232,6 +1239,23 @@ a.wip-link:hover {
 	}
 	.stats-grid {
 		grid-template-columns: 1fr 1fr;
+	}
+}
+
+@media (max-width: 380px) {
+	.top-bar-inner {
+		justify-content: center;
+		padding: 0.6rem 0.5rem;
+	}
+	.profile-mini {
+		display: none;
+	}
+	.top-bar-links {
+		gap: 0.2rem;
+	}
+	.nav-link {
+		font-size: 0.7rem;
+		padding: 0.28rem 0.4rem;
 	}
 }
 

@@ -1,5 +1,5 @@
 import type { PageServerLoad, EntryGenerator } from './$types';
-import { getBlogSlugs, getBlogPost } from '$lib/utils/blog';
+import { getBlogSlugs, getBlogPost } from '#lib/utils/blog.js';
 import { Marked } from 'marked';
 
 const marked = new Marked();
@@ -19,7 +19,7 @@ export const load: PageServerLoad = async ({ params }) => {
 	}
 
 	// Render markdown to HTML at build time
-	const html = await marked.parse(post.html);
+	const html = await marked.parse(post.markdown);
 
 	return {
 		meta: post.meta,

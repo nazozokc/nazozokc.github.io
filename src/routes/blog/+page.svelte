@@ -1,16 +1,8 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import AnimateOnView from '$lib/components/AnimateOnView.svelte';
-	import { browser } from '$app/environment';
+	import AnimateOnView from '#lib/components/AnimateOnView.svelte';
 
 	let { data }: { data: PageData } = $props();
-
-	function handlePostClick(e: Event, slug: string) {
-		e.preventDefault();
-		if (browser) {
-			window.location.href = `/blog/${slug}`;
-		}
-	}
 </script>
 
 <svelte:head>
